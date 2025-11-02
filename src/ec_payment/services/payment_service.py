@@ -1,5 +1,5 @@
 from ec_payment.provider.midtrans_provider import Customer, MidtransProvider
-from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, CreatePaymentResponseDTO, CustomerDTO
+from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, CreatePaymentResponseDTO, CustomerDTO, PaymentWebhookRequestDTO
 from typing import Dict, Any
 import logging
 
@@ -13,7 +13,7 @@ class PaymentService:
         self.payment_provider = MidtransProvider()
 
     def create_payment(self, create_payment_request: CreatePaymentRequestDTO) -> CreatePaymentResponseDTO:
-      
+
         """
         Create a payment transaction using the configured payment provider
 
@@ -62,5 +62,6 @@ class PaymentService:
                 message="Failed to create payment transaction",
                 error=str(e)
             )
-    
-    def handle_webhook(self, handle_webhook_request: PaymentWebhookRequestDto):
+
+    def handle_webhook(self, handle_webhook_request: PaymentWebhookRequestDTO):
+        None

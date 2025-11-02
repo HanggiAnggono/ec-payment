@@ -25,4 +25,4 @@ class CreatePaymentResponseDTO(BaseModel):
     error: Optional[str] = Field(None, description="Error message if any")
 
 class PaymentWebhookRequestDTO(BaseModel):
-  order_id
+    order_id: str = Field(..., description="Order identifier")
