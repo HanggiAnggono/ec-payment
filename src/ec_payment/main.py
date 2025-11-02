@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from ec_payment.config import Settings
-from ec_payment.dto.payment_dto import CreatePaymentRequestDTO
+from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, PaymentWebhookRequestDTO
 from ec_payment.services.payment_service import PaymentService
 
 
@@ -27,6 +27,6 @@ async def create_transaction(payment_request: CreatePaymentRequestDTO):
     return resp
 
 @app.post("/handle-webhook")
-async def handle_webhook():
+async def handle_webhook(webhook_request: PaymentWebhookRequestDTO):
   """Handle Webhook"""
-  payment_svc
+  payment_svc.handle_webhook(webhook_request)
