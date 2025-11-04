@@ -1,0 +1,20 @@
+### create payment
+POST http://localhost:8000/create-payment
+
+{
+  "order_id": "{{$guid}}",
+  "amount": 10,
+  "customer": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "0878248219493",
+    "email": "john@doe.com"
+  },
+  "description": "lorem ipsum dolor sit consecti"
+}
+
+
+# FIXME: this is still returning 404 transaction id not found
+### get order
+@order_id = 427eb49b-7eed-4b9a-a66d-3dd61fb65821
+GET http://localhost:8000/transaction/{{order_id}}

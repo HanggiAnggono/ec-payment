@@ -30,3 +30,10 @@ async def create_transaction(payment_request: CreatePaymentRequestDTO):
 async def handle_webhook(webhook_request: PaymentWebhookRequestDTO):
   """Handle Webhook"""
   payment_svc.handle_webhook(webhook_request)
+
+
+# FIXME: this is still returning 404 transaction id not found
+@app.get("/transaction/{order_id}")
+async def get_transaction(order_id: str):
+    order = payment_svc.get_status(order_id=order_id)
+    return order

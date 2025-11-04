@@ -67,3 +67,6 @@ class PaymentService:
         # create payment with ORM here
         # publish a payment created event
         None
+
+    def get_status(self, order_id: str):
+        self.payment_provider.get_status(order_id=order_id)
