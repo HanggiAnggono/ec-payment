@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from ec_payment.config import Settings
-from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, PaymentWebhookRequestDTO
+from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, PaymentStatusResponseDTO, PaymentWebhookRequestDTO
 from ec_payment.services.payment_service import PaymentService
 
 
@@ -32,8 +32,7 @@ async def handle_webhook(webhook_request: PaymentWebhookRequestDTO):
   payment_svc.handle_webhook(webhook_request)
 
 
-# FIXME: this is still returning 404 transaction id not found
-@app.get("/transaction/{order_id}")
+@app.get("/transaction/{order_id}", response_model=PaymentStatusResponseDTO)
 async def get_transaction(order_id: str):
     order = payment_svc.get_status(order_id=order_id)
     return order

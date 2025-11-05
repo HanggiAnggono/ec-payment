@@ -69,4 +69,5 @@ class PaymentService:
         None
 
     def get_status(self, order_id: str):
-        self.payment_provider.get_status(order_id=order_id)
+        status = self.payment_provider.get_status(order_id=order_id)
+        return status

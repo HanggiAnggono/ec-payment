@@ -1,5 +1,7 @@
+from datetime import datetime
+from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Literal, Optional, Dict, Any
 
 
 class CustomerDTO(BaseModel):
@@ -26,3 +28,45 @@ class CreatePaymentResponseDTO(BaseModel):
 
 class PaymentWebhookRequestDTO(BaseModel):
     order_id: str = Field(..., description="Order identifier")
+
+
+class PaymentStatusResponseDTO(BaseModel):
+    """
+    A Pydantic model representing a detailed payment transaction response.
+    """
+    status_code: str = Field(..., description="HTTP status code equivalent for the transaction result.")
+    transaction_id: str = Field(..., description="Unique ID for the transaction (UUID format).")
+
+    # Use float or Decimal for monetary values
+    gross_amount: float = Field(..., description="The gross amount of the transaction.")
+
+    currency: Currency = Field(..., description="Currency code in ISO 4217 format.")
+    order_id: str = Field(..., description="Unique ID for the merchant's order (UUID format).")
+    payment_type: PaymentType = Field(..., description="The payment method used.")
+    signature_key: str = Field(..., description="Hashed signature for verifying data integrity.")
+    transaction_status: TransactionStatus = Field(..., description="The final status of the transaction.")
+    fraud_status: Literal["accept", "deny", "challenge"] = Field(..., description="Result of the fraud detection analysis.")
+    status_message: str = Field(..., description="A human-readable message about the status.")
+    merchant_id: str = Field(..., description="The unique identifier for the merchant.")
+    transaction_type: str = Field(..., description="Type of transaction processing.")
+    issuer: str = Field(..., description="The party that issued the payment instrument.")
+    acquirer: str = Field(..., description="The payment processor that acquired the transaction.")
+
+    # Dates are parsed automatically into datetime objects if format is correct
+    transaction_time: datetime = Field(..., description="The time the transaction was initiated.")
+    settlement_time: datetime = Field(..., description="The time the transaction was successfully settled.")
+    expiry_time: datetime = Field(..., description="The time the payment request would have expired.")
+
+# 1. Define specific ENUMS for certain fields
+class Currency(str, Enum):
+    IDR = "IDR"
+    # Add other currencies if supported
+
+class PaymentType(str, Enum):
+    QRIS = "qris"
+    # Add other payment types
+
+class TransactionStatus(str, Enum):
+    SETTLEMENT = "settlement"
+    PENDING = "pending"
+    FAILURE = "failure"

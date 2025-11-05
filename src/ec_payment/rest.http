@@ -16,5 +16,5 @@ POST http://localhost:8000/create-payment
 
 # FIXME: this is still returning 404 transaction id not found
 ### get order
-@order_id = 427eb49b-7eed-4b9a-a66d-3dd61fb65821
+@order_id = 6f1cf3b3-7f07-4e4a-945a-754f399595d7
 GET http://localhost:8000/transaction/{{order_id}}
