@@ -1,9 +1,17 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from ec_payment.config import Settings
 from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, PaymentStatusResponseDTO, PaymentWebhookRequestDTO
 from ec_payment.services.payment_service import PaymentService
+from ec_payment.model.db import create_db_and_tables
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up...")
+    create_db_and_tables()
+    yield
+    print("Shutting down...")
 
 app = FastAPI(
     title="EC Payment API",
@@ -12,7 +20,6 @@ app = FastAPI(
 )
 
 payment_svc = PaymentService()
-
 
 @app.get("/")
 async def hello_world():
