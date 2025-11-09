@@ -1,22 +1,28 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from sqlmodel import Session
 
 from ec_payment.config import Settings
 from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, PaymentStatusResponseDTO, PaymentWebhookRequestDTO
 from ec_payment.services.payment_service import PaymentService
-from ec_payment.model.db import create_db_and_tables
+from ec_payment.model.db import create_db_and_tables, get_session
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting up...")
+    logger.info("Starting up...")
     create_db_and_tables()
     yield
-    print("Shutting down...")
+    logger.info("Shutting down...")
 
 app = FastAPI(
     title="EC Payment API",
     description="A simple payment and order management API",
     version="0.1.0",
+    lifespan=lifespan
 )
 
 payment_svc = PaymentService()
@@ -34,9 +40,10 @@ async def create_transaction(payment_request: CreatePaymentRequestDTO):
     return resp
 
 @app.post("/handle-webhook")
-async def handle_webhook(webhook_request: PaymentWebhookRequestDTO):
+async def handle_webhook(webhook_request: PaymentWebhookRequestDTO, db: Session = Depends(get_session)):
   """Handle Webhook"""
-  payment_svc.handle_webhook(webhook_request)
+  payment = payment_svc.handle_webhook(webhook_request, db)
+  return payment
 
 
 @app.get("/transaction/{order_id}", response_model=PaymentStatusResponseDTO)

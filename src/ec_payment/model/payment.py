@@ -1,29 +1,34 @@
+from datetime import datetime
+from decimal import Decimal
 from enum import Enum
+from typing import List, Optional
 from uuid import uuid4
 from sqlmodel import Field, SQLModel
 
 
-class TransactionStatus(str, Enum):
-    SETTLEMENT = "settlement"
+class PaymentStatus(str, Enum):
     PENDING = "pending"
-    FAILURE = "failure"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class PaymentMethod(str, Enum):
+    EWALLET = "ewallet"
+    CREDIT_CARD = "credit_card"
+    DEBIT_CARD = "debit_card"
+    PAYPAL = "paypal"
+    BANK_TRANSFER = "bank_transfer"
 
 class Payment(SQLModel, table=True):
-  id: str = Field(default=uuid4(), primary_key=True)
-  status: TransactionStatus = Field(default=TransactionStatus.PENDING)
-  gross_amount: float
-  currency: str
-  order_id: str
-  payment_type: str
-  signature_key: str
-  transaction_id: str
-  transaction_status: TransactionStatus
-  fraud_status: str
-  status_message: str
-  merchant_id: str
-  transaction_type: str
-  issuer: str
-  acquirer: str
-  transaction_time: str
-  settlement_time: str
-  expiry_time: str
+    id: str = Field(default=uuid4().__str__(), primary_key=True, description="Unique payment identifier")
+    order_id: str = Field(..., description="Associated order identifier")
+    transaction_id: str = Field(..., description="Transaction identifier")
+    amount: Decimal = Field(..., description="Payment amount", gt=0)
+    currency: str = Field(..., description="Currency code (e.g., USD, EUR)")
+    status: PaymentStatus = Field(..., description="Payment status")
+    method: PaymentMethod = Field(..., description="Payment method used")
+    created_at: datetime = Field(default=datetime.now(), description="Payment creation timestamp")
+    updated_at: datetime | None = Field(default=None, description="Payment last update timestamp")
+    description: Optional[str] = Field(None, description="Payment description")
+

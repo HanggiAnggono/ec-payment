@@ -1,8 +1,10 @@
-from ec_payment.core.interfaces import PaymentProvider
 from midtransclient import Snap, CoreApi
 from typing import Any
 import os
 import logging
+
+from ec_payment.core.interfaces import PaymentProvider
+from ec_payment.model.payment import PaymentMethod, PaymentStatus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -113,6 +115,37 @@ class MidtransProvider(PaymentProvider):
             )
             raise Exception(f"Failed to get transaction status: {str(e)}")
 
+    def get_status_name(self, status: str) -> PaymentStatus:
+        match status:
+            case "settlement":
+                return PaymentStatus.COMPLETED
+            case "pending":
+                return PaymentStatus.PENDING
+            case "failure":
+                return PaymentStatus.FAILED
+            case "cancel":
+                return PaymentStatus.CANCELLED
+            case _:
+                logger.error(f"Unknown transaction status: {status}")
+
+        return PaymentStatus.PENDING
+
+    def get_payment_method(self, payment_type: str) -> PaymentMethod:
+        match payment_type:
+            case "gopay":
+                return PaymentMethod.EWALLET
+            case "credit_card":
+                return PaymentMethod.CREDIT_CARD
+            case "debit_card":
+                return PaymentMethod.DEBIT_CARD
+            case "paypal":
+                return PaymentMethod.PAYPAL
+            case "bank_transfer":
+                return PaymentMethod.BANK_TRANSFER
+            case _:
+                logger.error(f"Unknown payment type: {payment_type}")
+
+        return PaymentMethod.EWALLET
 
 class Customer:
     """Customer data class for Midtrans transactions"""

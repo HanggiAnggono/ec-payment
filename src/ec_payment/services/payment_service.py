@@ -1,7 +1,13 @@
-from ec_payment.provider.midtrans_provider import Customer, MidtransProvider
-from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, CreatePaymentResponseDTO, CustomerDTO, PaymentWebhookRequestDTO
+from decimal import Decimal
+from fastapi import Depends
+from sqlmodel import Session, desc
 from typing import Dict, Any
 import logging
+
+from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, CreatePaymentResponseDTO, CustomerDTO, PaymentWebhookRequestDTO
+from ec_payment.provider.midtrans_provider import MidtransProvider
+from ec_payment.model.payment import Payment
+from ec_payment.model.db import get_session
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -63,10 +69,29 @@ class PaymentService:
                 error=str(e)
             )
 
-    def handle_webhook(self, handle_webhook_request: PaymentWebhookRequestDTO):
+    def handle_webhook(
+        self,
+        request: PaymentWebhookRequestDTO,
+        db: Session
+    ):
         # create payment with ORM here
         # publish a payment created event
-        None
+        status = self.payment_provider.get_status_name(request.transaction_status)
+        method = self.payment_provider.get_payment_method(request.payment_type)
+        payment = Payment(
+            status=status,
+            currency=request.currency,
+            order_id=request.order_id,
+            amount=Decimal(request.gross_amount),
+            transaction_id=request.transaction_id,
+            method=method,
+            description=""
+        )
+
+        db.add(payment)
+        db.commit()
+        db.refresh(payment)
+        return payment
 
     def get_status(self, order_id: str):
         status = self.payment_provider.get_status(order_id=order_id)

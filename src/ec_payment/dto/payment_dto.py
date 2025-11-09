@@ -27,7 +27,19 @@ class CreatePaymentResponseDTO(BaseModel):
     error: Optional[str] = Field(None, description="Error message if any")
 
 class PaymentWebhookRequestDTO(BaseModel):
+    transaction_time: datetime = Field(...)
+    transaction_status: str = Field(...)
+    transaction_id: str = Field(...)
+    status_message: str = Field(...)
+    status_code: str = Field(...)
+    signature_key: str = Field(...)
+    settlement_time: datetime = Field(...)
+    payment_type: str = Field(...)
     order_id: str = Field(..., description="Order identifier")
+    merchant_id: str = Field(...)
+    gross_amount: float = Field(...)
+    fraud_status: str = Field(...)
+    currency: str = Field(..., description="Currency code")
 
 
 class PaymentStatusResponseDTO(BaseModel):
