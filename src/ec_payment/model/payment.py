@@ -27,8 +27,11 @@ class Payment(SQLModel, table=True):
     amount: Decimal = Field(..., description="Payment amount", gt=0)
     currency: str = Field(..., description="Currency code (e.g., USD, EUR)")
     status: PaymentStatus = Field(..., description="Payment status")
-    method: PaymentMethod = Field(..., description="Payment method used")
+    method: PaymentMethod | None = Field(default=None, description="Payment method used")
     created_at: datetime = Field(default=datetime.now(), description="Payment creation timestamp")
     updated_at: datetime | None = Field(default=None, description="Payment last update timestamp")
-    description: Optional[str] = Field(None, description="Payment description")
+    description: Optional[str] = Field(None, description="Payment description", max_length=500)
+    meta: Optional[str] = Field(default=None, description="Additional metadata", max_length=2000)
+    payment_url: Optional[str] = Field(default=None, description="Payment URL")
+
 

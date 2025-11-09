@@ -34,9 +34,9 @@ async def hello_world():
 
 
 @app.post("/create-payment")
-async def create_transaction(payment_request: CreatePaymentRequestDTO):
+async def create_transaction(payment_request: CreatePaymentRequestDTO, db: Session = Depends(get_session)):
     """Create Transaction"""
-    resp = payment_svc.create_payment(payment_request)
+    resp = payment_svc.create_payment(payment_request, db)
     return resp
 
 @app.post("/handle-webhook")

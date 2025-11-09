@@ -1,4 +1,5 @@
 from decimal import Decimal
+import json
 from fastapi import Depends
 from sqlmodel import Session, desc
 from typing import Dict, Any
@@ -6,7 +7,7 @@ import logging
 
 from ec_payment.dto.payment_dto import CreatePaymentRequestDTO, CreatePaymentResponseDTO, CustomerDTO, PaymentWebhookRequestDTO
 from ec_payment.provider.midtrans_provider import MidtransProvider
-from ec_payment.model.payment import Payment
+from ec_payment.model.payment import Payment, PaymentMethod, PaymentStatus
 from ec_payment.model.db import get_session
 
 # Set up logging
@@ -18,7 +19,7 @@ class PaymentService:
         """Initialize PaymentService with MidtransProvider"""
         self.payment_provider = MidtransProvider()
 
-    def create_payment(self, create_payment_request: CreatePaymentRequestDTO) -> CreatePaymentResponseDTO:
+    def create_payment(self, create_payment_request: CreatePaymentRequestDTO, db: Session) -> CreatePaymentResponseDTO:
 
         """
         Create a payment transaction using the configured payment provider
@@ -43,8 +44,23 @@ class PaymentService:
             )
 
             # Extract relevant information from Midtrans response
-            transaction_token = transaction_response.get('token')
+            transaction_token = transaction_response.get('token', '')
             redirect_url = transaction_response.get('redirect_url')
+
+            # Create a new Payment record with a 'pending' status
+            payment = Payment(
+                order_id=create_payment_request.order_id,
+                amount=Decimal(create_payment_request.amount),
+                currency="IDR",  # Assuming IDR, or get from request
+                status=PaymentStatus.PENDING,
+                method=None, # Placeholder, will be updated by webhook
+                transaction_id=transaction_token, # Using token as initial transaction_id
+                description=create_payment_request.description,
+                payment_url=redirect_url,
+                meta=json.dumps(transaction_response)
+            )
+            db.add(payment)
+            db.commit()
 
             logger.info(f"Payment created successfully for order_id: {create_payment_request.order_id}")
 
